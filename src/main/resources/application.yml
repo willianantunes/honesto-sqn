@@ -1,0 +1,27 @@
+camel:
+  springboot:
+    main-run-controller: true
+    name: camel-context-honesto-sqn
+  component:
+    telegram:
+      authorization-token: YOUR-AUTHORIZATION-TOKEN-HERE
+
+spring:
+    application:
+        name: honesto-sqn
+    main:
+        banner-mode: "off"
+    jpa:
+        generate-ddl: true
+        show-sql: true
+        hibernate:
+            ddl-auto: create-drop         
+    security:
+        enabled: false        
+
+---
+
+spring:
+    profiles: it
+    
+custom.brokerURL: tcp://localhost:${activemq.port}?jms.prefetchPolicy.all=1    

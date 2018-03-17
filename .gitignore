@@ -1,0 +1,31 @@
+# ignore almost everything in this directory
+target
+.classpath
+.settings
+.project
+*.iml
+*.iws
+*.ipr
+.idea
+*.class
+
+# ignore Intellij-IDEA files
+*.iml
+*.ipr
+*.iws
+*.classpath
+*.settings
+*.project
+*.idea
+.DS_Store
+
+# Package Files #
+*.war
+*.ear
+
+# ignore logs
+*.log
+
+# ignore target directories
+target/
+*.*~
