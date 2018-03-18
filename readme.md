@@ -1,6 +1,8 @@
 
 # Honesto SQN
 
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/1b4ee765643a60f5ba5f)
+
 Uso de parte da stack [Serenata de Amor](https://serenata.ai/) para auxiliar cidadãos a fiscalizar seus políticos pelo Telegram por enquanto, porque a ideia é incluir outros serviços também.
 
 ----
