@@ -48,8 +48,7 @@
    	<logger name="org.springframework" level="INFO" />
    	<logger name="org.apache.camel.component.telegram" level="DEBUG" />   	
 	<logger name="br.com.willianantunes" level="DEBUG" />
-	
-    
+	    
 	<root level="INFO">
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="FILE-INSERT-STANDARD" />		

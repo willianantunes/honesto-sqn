@@ -13,7 +13,7 @@ public class JpaConfiguration {
     public DataSource dataSource() {
         
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setUrl("jdbc:h2:mem:sptv;DB_CLOSE_DELAY=-1");
+        dataSource.setUrl("jdbc:h2:mem:honesto-sqn;DB_CLOSE_DELAY=-1");
         dataSource.setDriverClassName(org.h2.Driver.class.getName());
         dataSource.setUsername("sa");
         dataSource.setPassword("");
