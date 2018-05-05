@@ -27,6 +27,10 @@ Não sei se existe algum problema com o projeto em si, mas não roda de primeira
 
 ![Mapa de navegação por opções](docs/fluxos-honesto-sqn.png?raw=true "Mapa de navegação por opções")
 
+## Frutos do projeto
+
+- [Contribuição ao projeto open-source Apache Camel aprimorando o componente de integração com Telegram](https://github.com/apache/camel/pull/2318)
+
 ## Links para referência/estudo
 
 - [Envio de mensagem customizada](https://core.telegram.org/bots#keyboards)
