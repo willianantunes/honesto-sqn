@@ -22,13 +22,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "TB_CHAT_TRANSACTION")
-@NamedQueries({ @NamedQuery(name = ChatTransaction.NAMED_QUERY_SELECT_ALL, query = "SELECT m FROM ChatTransaction m"),
-    @NamedQuery(name = ChatTransaction.NAMED_QUERY_SELECT_NOT_FINISHED_BY_CHAT_ID, 
+@NamedQueries({ @NamedQuery(name = ChatTransaction.NAMED_QUERY_SELECT_NOT_FINISHED_BY_CHAT_ID, 
         query = "SELECT m FROM ChatTransaction m WHERE m.chatId = :chatId AND finished = false")})
 public class ChatTransaction {
 
-    public static final String NAMED_QUERY_SELECT_ALL = "SELECT-ALL";
-    public static final String NAMED_QUERY_SELECT_NOT_FINISHED_BY_CHAT_ID = "SELECT_BY_CHAT_ID";
+    public static final String NAMED_QUERY_SELECT_NOT_FINISHED_BY_CHAT_ID = "CHAT_TRANSACTION_NAMED_QUERY_SELECT_NOT_FINISHED_BY_CHAT_ID";
 
     @Id
     @GeneratedValue
