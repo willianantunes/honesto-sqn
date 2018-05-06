@@ -1,5 +1,7 @@
 package br.com.willianantunes.route;
 
+import static br.com.willianantunes.route.RouteHelper.verifyWhoTheUserIsWatching;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,7 +34,7 @@ public class WhoAmIWatchingRoute extends RouteBuilder {
                     .process(preparaBodyWithPoliticiansList())
                 .otherwise()
                     .setBody(constant(messages.get(Messages.COMMAND_ATUAL_NO_ONE)))
-                .end()            
+                .end()
             .to("log:INFO?showHeaders=true")        
             .to("telegram:bots");
     }
@@ -53,11 +55,5 @@ public class WhoAmIWatchingRoute extends RouteBuilder {
                 exchange.getIn().setBody(messages.get(Messages.COMMAND_ATUAL, politicians)); 
             });
         };
-    }
-
-    private String verifyWhoTheUserIsWatching() {
-        
-        return String.format("jpa:%s?namedQuery=%s&consumeDelete=%s&parameters={\"chatId\":${body.chat.id}}",
-                Room.class.getName(), Room.NAMED_QUERY_SELECT_BY_CHAT_ID, false);
     }
 }

@@ -1,5 +1,7 @@
 package br.com.willianantunes.route;
 
+import static br.com.willianantunes.route.RouteHelper.prepareMessageToBePersisted;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
@@ -28,7 +30,7 @@ public class WatchPoliticianRoute extends RouteBuilder {
     public void configure() throws Exception {
         
         fromF("direct:%s", DIRECT_ENDPOINT_RECEPTION).routeId(ROUTE_ID_FIRST_CONTACT)
-            .process(prepareMessageToBePersisted())
+            .process(prepareMessageToBePersisted(DIRECT_ENDPOINT_AFTER_RECEPTION))
             .toF("jpa:%s", ChatTransaction.class.getName())
             .log("Inserted new ChatTransaction with ID ${body.id}")
             .setBody(constant(messages.get(Messages.COMMAND_CONFIGURAR)))
@@ -39,25 +41,5 @@ public class WatchPoliticianRoute extends RouteBuilder {
             .setBody(constant(messages.get(Messages.COMMAND_NOT_AVAILABLE)))
             .to("log:INFO?showHeaders=true")
             .to("telegram:bots");
-    }
-
-    private Processor prepareMessageToBePersisted() {
-        
-        return exchange -> {
-            
-            IncomingMessage message = exchange.getIn().getBody(IncomingMessage.class);
-            
-            ChatTransaction chatTransaction = ChatTransaction.builder()
-                .chatId(Integer.parseInt(message.getChat().getId()))
-                .messageId(message.getMessageId().intValue())
-                .message(message.getText())
-                .firstName(message.getFrom().getFirstName())
-                .lastName(message.getFrom().getLastName())
-                .sentAt(LocalDateTime.ofInstant(message.getDate(), ZoneId.systemDefault()))
-                .finished(false)
-                .chatEndpoint(DIRECT_ENDPOINT_AFTER_RECEPTION).build();
-            
-            exchange.getIn().setBody(chatTransaction);
-        };
     }
 }
