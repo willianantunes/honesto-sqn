@@ -26,6 +26,7 @@ public class RedirectToResponsibleOptionRoute extends RouteBuilder {
             .process(prepareChatTransactionToBeUpdated())
             .toF("jpa:%s&useExecuteUpdate=%s", ChatTransaction.class.getName(), true)
             .log("Redirecting user ${body.firstName} ${body.lastName} to endpoint ${body.chatEndpoint}")
+            .setBody(exchangeProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
             .toD("direct:${body.chatEndpoint}");
     }
 
