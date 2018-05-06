@@ -16,6 +16,9 @@ public class Messages {
     
     public static final String COMMAND_CONFIGURAR = "command.configurar";
     
+    public static final String COMMAND_ATUAL = "command.atual";
+    public static final String COMMAND_ATUAL_NO_ONE = "command.atual.no-one";    
+    
     public static final String COMMAND_RETIRAR_CONFIGURED = "command.retirar.configured";
     public static final String COMMAND_RETIRAR_COMPLETED = "command.retirar.completed";
     public static final String COMMAND_RETIRAR_WRONG_OPTION = "command.retirar.wrong-option";

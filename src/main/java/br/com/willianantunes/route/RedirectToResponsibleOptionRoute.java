@@ -25,12 +25,13 @@ public class RedirectToResponsibleOptionRoute extends RouteBuilder {
         fromF("direct:%s", DIRECT_ENDPOINT_RECEPTION).routeId(ROUTE_ID_FIRST_CONTACT)
             .process(prepareChatTransactionToBeUpdated())
             .toF("jpa:%s&useExecuteUpdate=%s", ChatTransaction.class.getName(), true)
-            .log("User ${body.firstName} to endpoint ${body.chatEndpoint}")
+            .log("Redirecting user ${body.firstName} ${body.lastName} to endpoint ${body.chatEndpoint}")
             .toD("direct:${body.chatEndpoint}");
     }
 
     @SuppressWarnings("unchecked")
     private Processor prepareChatTransactionToBeUpdated() {
+        
         return exchange -> {
             
             Optional<ChatTransaction> previousMessage = exchange.getIn().getBody(List.class).stream().findFirst();
