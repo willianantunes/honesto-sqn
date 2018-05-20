@@ -18,3 +18,7 @@ spring:
             ddl-auto: create-drop         
     security:
         enabled: false
+
+serenata:
+    jarbas:
+        endpoint: https://jarbas.serenata.ai/api
