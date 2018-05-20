@@ -10,6 +10,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.AdviceWithRouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.component.telegram.model.IncomingMessage;
+import org.apache.camel.component.telegram.model.OutgoingTextMessage;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
 import org.apache.camel.test.spring.UseAdviceWith;
@@ -86,10 +87,10 @@ public class LetMeQuitRouteTest {
         
         assertThat(mockedResultTelegramBotExit.getReceivedExchanges())
             .hasSize(1).allSatisfy(e -> {
-                
-                String text = e.getIn().getBody(String.class);
 
-                assertThat(text).isEqualTo(messages.get(Messages.COMMAND_RETIRAR_COMPLETED));
+                OutgoingTextMessage outgoingTextMessage = e.getIn().getBody(OutgoingTextMessage.class);
+
+                assertThat(outgoingTextMessage.getText()).isEqualTo(messages.get(Messages.COMMAND_RETIRAR_COMPLETED));
             });
     }
 
@@ -116,12 +117,12 @@ public class LetMeQuitRouteTest {
         assertThat(chat.get().getFinished()).isTrue();
 
         assertThat(mockedResultTelegramBotExit.getReceivedExchanges())
-                .hasSize(1).allSatisfy(e -> {
+            .hasSize(1).allSatisfy(e -> {
 
-            String text = e.getIn().getBody(String.class);
+                OutgoingTextMessage outgoingTextMessage = e.getIn().getBody(OutgoingTextMessage.class);
 
-            assertThat(text).isEqualTo(messages.get(Messages.COMMAND_RETIRAR_WRONG_OPTION, message.getText()));
-        });
+                assertThat(outgoingTextMessage.getText()).isEqualTo(messages.get(Messages.COMMAND_RETIRAR_WRONG_OPTION, message.getText()));
+            });
     }
     
     private void prepareCamelEnvironment() throws Exception {

@@ -8,6 +8,7 @@ import br.com.willianantunes.model.Room;
 import br.com.willianantunes.repository.RoomRepository;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.telegram.TelegramParseMode;
 import org.apache.camel.component.telegram.model.IncomingMessage;
 import org.apache.camel.component.telegram.model.InlineKeyboardButton;
 import org.apache.camel.component.telegram.model.OutgoingTextMessage;
@@ -45,14 +46,14 @@ public class LetMeQuitRoute extends RouteBuilder {
         fromF("direct:%s", DIRECT_ENDPOINT_RECEPTION).routeId(ROUTE_ID_FIRST_CONTACT)
             .toD(verifyWhoTheUserIsWatching())
             .choice()
-                .when(simple("${body.iterator.next?.politicians.size} > 0"))
+                .when(simple("${body.iterator.hasNext} == true && ${body.iterator.next.politicians.size} > 0"))
                     .process(prepareMessageWithCustomKeyboardAndStoreInProperty(PROPERTY_STORED_MESSAGE))
                     .process(prepareMessageToBePersistedByProperty(DIRECT_ENDPOINT_AFTER_RECEPTION, SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
                     .toF("jpa:%s", ChatTransaction.class.getName())
                     .log("Inserted new ChatTransaction with ID ${body.id}")
                     .setBody(exchangeProperty(PROPERTY_STORED_MESSAGE))
                 .otherwise()
-                    .setBody(constant(messages.get(Messages.COMMAND_ATUAL_NO_ONE)))
+                    .setBody(constant(messages.get(Messages.COMMAND_RETIRAR_NOT_CONFIGURED)))
                 .end()
             .to("log:INFO?showHeaders=true")
             .to("telegram:bots");
@@ -70,9 +71,26 @@ public class LetMeQuitRoute extends RouteBuilder {
             .setProperty(PROPERTY_STORED_MESSAGE, body())
             .toD(finishChatTransaction(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
             .log("ChatTransaction with ID ${body} was configured as finished")
-            .setBody(exchangeProperty(PROPERTY_STORED_MESSAGE))
+            .process(configureReplyToRemoveCustomKeyBoard())
             .to("log:INFO?showHeaders=true")
             .to("telegram:bots");
+    }
+
+    private Processor configureReplyToRemoveCustomKeyBoard() {
+
+        return exchange -> {
+
+            ReplyKeyboardMarkup replyKeyboardMarkup = ReplyKeyboardMarkup.builder()
+                    .removeKeyboard(true)
+                    .build();
+
+            OutgoingTextMessage message = OutgoingTextMessage.builder()
+                    .text(exchange.getProperty(PROPERTY_STORED_MESSAGE, String.class))
+                    .parseMode(TelegramParseMode.MARKDOWN.getCode())
+                    .replyKeyboardMarkup(replyKeyboardMarkup).build();
+
+            exchange.getIn().setBody(message);
+        };
     }
 
     private Processor replyWarningAboutWrongOptionSelected() {

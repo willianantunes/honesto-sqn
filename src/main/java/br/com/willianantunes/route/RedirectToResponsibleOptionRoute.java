@@ -19,15 +19,18 @@ public class RedirectToResponsibleOptionRoute extends RouteBuilder {
     
     public static final String DIRECT_ENDPOINT_RECEPTION = ROUTE_ID_FIRST_CONTACT.concat("-DIRECT-RECEPTION");
 
+    public static final String PROPERTY_REDIRECT_POINTER = "PROPERTY_REDIRECT_POINTER";
+
     @Override
     public void configure() {
-        
+
         fromF("direct:%s", DIRECT_ENDPOINT_RECEPTION).routeId(ROUTE_ID_FIRST_CONTACT)
             .process(prepareChatTransactionToBeUpdated())
             .toF("jpa:%s&useExecuteUpdate=%s", ChatTransaction.class.getName(), true)
             .log("Redirecting user ${body.firstName} ${body.lastName} to endpoint ${body.chatEndpoint}")
+            .setProperty(PROPERTY_REDIRECT_POINTER, simple("${body.chatEndpoint}"))
             .setBody(exchangeProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
-            .toD("direct:${body.chatEndpoint}");
+            .toD(String.format("direct:${exchangeProperty[%s]}", PROPERTY_REDIRECT_POINTER));
     }
 
     private Processor prepareChatTransactionToBeUpdated() {
