@@ -3,16 +3,7 @@ package br.com.willianantunes.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,10 +16,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "TB_ROOM")
-@NamedQueries({ @NamedQuery(name = Room.NAMED_QUERY_SELECT_BY_CHAT_ID, query = "SELECT r FROM Room r WHERE r.chatId = :chatId")})
+@NamedQueries({ 
+    @NamedQuery(name = Room.NQ_ROOM_SELECT_BY_CHAT_ID, 
+        query = "SELECT r FROM Room r WHERE r.chatId = :chatId"), 
+    @NamedQuery(name = Room.NQ_ROOM_SELECT_BY_CHAT_ID_AND_POLITICIAN_NAME, 
+        query = "SELECT p FROM Room r INNER JOIN r.politicians p WHERE r.chatId = :chatId AND p.name = :name") })
 public class Room {
 
-    public static final String NAMED_QUERY_SELECT_BY_CHAT_ID = "ROOM_NAMED_QUERY_SELECT_BY_CHAT_ID";
+    public static final String NQ_ROOM_SELECT_BY_CHAT_ID = "NQ_ROOM_SELECT_BY_CHAT_ID";
+    public static final String NQ_ROOM_SELECT_BY_CHAT_ID_AND_POLITICIAN_NAME = "NQ_ROOM_SELECT_BY_CHAT_ID_AND_POLITICIAN_NAME";
     
     @Id
     @GeneratedValue
@@ -36,14 +32,14 @@ public class Room {
     @Column(unique = true)
     private Integer chatId;
     @Column
-    @ManyToMany(cascade = { CascadeType.PERSIST })
+    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
     private List<Politician> politicians;
     @Column
-    private LocalDateTime createdAt;    
+    private LocalDateTime createdAt;
     
     @PrePersist
     private void prePersiste() {
         
         createdAt = LocalDateTime.now();
-    }    
+    }
 }

@@ -20,7 +20,7 @@ public class RedirectToResponsibleOptionRoute extends RouteBuilder {
     public static final String DIRECT_ENDPOINT_RECEPTION = ROUTE_ID_FIRST_CONTACT.concat("-DIRECT-RECEPTION");
 
     @Override
-    public void configure() throws Exception {
+    public void configure() {
         
         fromF("direct:%s", DIRECT_ENDPOINT_RECEPTION).routeId(ROUTE_ID_FIRST_CONTACT)
             .process(prepareChatTransactionToBeUpdated())
@@ -30,7 +30,6 @@ public class RedirectToResponsibleOptionRoute extends RouteBuilder {
             .toD("direct:${body.chatEndpoint}");
     }
 
-    @SuppressWarnings("unchecked")
     private Processor prepareChatTransactionToBeUpdated() {
         
         return exchange -> {

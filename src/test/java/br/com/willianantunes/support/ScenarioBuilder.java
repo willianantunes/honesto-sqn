@@ -10,6 +10,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 
+import br.com.willianantunes.model.ChatTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,8 @@ public class ScenarioBuilder {
     private EntityManager entityManager;
     
     @Getter
-    private List<Room> rooms = new ArrayList<>();    
+    private List<Room> rooms = new ArrayList<>();
+    private List<ChatTransaction> chats = new ArrayList<>();
 
     @Transactional
     public ScenarioBuilder unbuild() {
@@ -42,7 +44,7 @@ public class ScenarioBuilder {
         Object[] minhasTabelas = (Object[]) createNativeQuery.getResultList().get(0);
 
         Arrays.stream(minhasTabelas)
-            .map(o -> o.toString())
+            .map(Object::toString)
             .filter(s -> s.startsWith("TB_"))
             .forEach(t -> entityManager.createNativeQuery("truncate table " + t).executeUpdate());
 
@@ -51,14 +53,21 @@ public class ScenarioBuilder {
     
     public void build() {
 
-        Optional.ofNullable(rooms).ifPresent(roomRepository::save);        
+        Optional.ofNullable(rooms).ifPresent(roomRepository::save);
+        Optional.ofNullable(chats).ifPresent(chatTransactionRepository::save);
     }    
 
     public RoomBuilder createRoom(Room room) {
         
         return new RoomBuilder(this, room);
     }
-    
+
+    public ScenarioBuilder createChatTransaction(ChatTransaction chatTransaction) {
+
+        chats.add(chatTransaction);
+        return this;
+    }
+
     public static class RoomBuilder {
         
         private Room room;

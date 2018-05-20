@@ -14,13 +14,25 @@ public class RouteHelper {
     public static String verifyUserConversation() {
         
         return String.format("jpa:%s?namedQuery=%s&consumeDelete=%s&parameters={\"chatId\":${body.chat.id}}",
-                ChatTransaction.class.getName(), ChatTransaction.NAMED_QUERY_SELECT_NOT_FINISHED_BY_CHAT_ID, false);
+                ChatTransaction.class.getName(), ChatTransaction.CHAT_TRANSACTION_NAMED_QUERY_SELECT_NOT_FINISHED_BY_CHAT_ID, false);
     }
     
     public static String verifyWhoTheUserIsWatching() {
         
         return String.format("jpa:%s?namedQuery=%s&consumeDelete=%s&parameters={\"chatId\":${body.chat.id}}",
-                Room.class.getName(), Room.NAMED_QUERY_SELECT_BY_CHAT_ID, false);
+                Room.class.getName(), Room.NQ_ROOM_SELECT_BY_CHAT_ID, false);
+    }
+    
+    public static String verifyTheUserIsWatching() {
+        
+        return String.format("jpa:%s?namedQuery=%s&consumeDelete=%s&parameters={\"chatId\":${body.chat.id}, \"name\":\"${in.body}\"}",
+                Room.class.getName(), Room.NQ_ROOM_SELECT_BY_CHAT_ID_AND_POLITICIAN_NAME, false);
+    }
+
+    public static String finishChatTransaction(String propertyTelegramMessage) {
+
+        return String.format("jpa:%s?namedQuery=%s&useExecuteUpdate=%s&parameters={\"chatId\":${exchangeProperty[%s].chat.id}}",
+                ChatTransaction.class.getName(), ChatTransaction.CHAT_TRANSACTION_NAMED_QUERY_FINISH_CONVERSATION_BY_CHAT_ID, true, propertyTelegramMessage);
     }
     
     public static Processor prepareMessageToBePersisted(String chatEndpoint) {
