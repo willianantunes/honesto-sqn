@@ -1,6 +1,9 @@
 package br.com.willianantunes.serenata.model;
 
+import br.com.willianantunes.util.deser.LocalDateFromISODateDeserializer;
+import br.com.willianantunes.util.deser.ZonedDateTimeFromISOOffsetDateTimeDeserializer;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

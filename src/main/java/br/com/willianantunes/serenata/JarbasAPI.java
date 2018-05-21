@@ -17,16 +17,21 @@ public interface JarbasAPI {
 
     @GET
     @Path("/chamber_of_deputies/reimbursement")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     Pagination findReimbursement(@QueryParam("search") String search);
 
     @GET
+    @Path("/chamber_of_deputies/reimbursement")
+    @Produces(MediaType.APPLICATION_JSON)
+    Pagination findReimbursementWithYear(@QueryParam("search") String search, @QueryParam("year") Integer year);
+
+    @GET
     @Path("/chamber_of_deputies/reimbursement/{documentId}")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     Reimbursement reimbursementByDocumentId(@PathParam("documentId") Integer documentId);
 
     @GET
     @Path("/chamber_of_deputies/reimbursement/{documentId}/receipt")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     Receipt reimbursementReceipt(@PathParam("documentId") Integer documentId);
 }
