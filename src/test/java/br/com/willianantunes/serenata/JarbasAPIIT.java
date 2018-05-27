@@ -61,7 +61,7 @@ public class JarbasAPIIT {
     @Test
     public void retrieveReimbursementReceipt() {
 
-        Receipt receipt = api.reimbursementReceipt(documentIdJaVa);
+        Receipt receipt = api.reimbursementReceiptByDocumentId(documentIdJaVa);
 
         assertThat(receipt).isNotNull().satisfies(r -> {
             assertThat(r.getUrl()).isEqualTo("http://www.camara.gov.br/cota-parlamentar/documentos/publ/2908/2016/6094149.pdf");

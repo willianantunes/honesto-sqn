@@ -46,7 +46,8 @@
 	</appender>
 
    	<logger name="org.springframework" level="INFO" />
-   	<logger name="org.apache.camel.component.telegram" level="DEBUG" />   	
+   	<logger name="org.apache.camel.component.telegram" level="DEBUG" />
+	<logger name="org.apache.camel.component.cxf" level="ALL" />
 	<logger name="br.com.willianantunes" level="DEBUG" />
 	    
 	<root level="INFO">

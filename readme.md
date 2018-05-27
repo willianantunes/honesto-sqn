@@ -3,7 +3,7 @@
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/1b4ee765643a60f5ba5f)
 
-Uso de parte da stack [Serenata de Amor](https://serenata.ai/) para auxiliar cidadãos a fiscalizar seus políticos pelo Telegram por enquanto, porque a ideia é incluir outros serviços também.
+Uso de parte da stack [Serenata de Amor](https://serenata.ai/) como o [Jarbas](https://github.com/okfn-brasil/serenata-de-amor/tree/97a4a34e730f58ed1fa6bf4833a23e0e50e27cfa/jarbas#json-api-endpoints) para auxiliar cidadãos a fiscalizarem seus políticos pelo Telegram.
 
 ----
 
@@ -23,15 +23,23 @@ Para o terceiro item faça o seguinte (leia o comentário final antes de executa
 
 Não sei se existe algum problema com o projeto em si, mas não roda de primeira, pode lançar vários erros. O que fiz para funcionar no meu caso foi desabilitar a construção do serviço `research` no `docker-compose.yml`.
 
+### Download de correções e novas features para rodar projeto
+
+Como tive que criar e corrigir algumas situações no Apache Camel, dependendo de quando você baixar o repositório talvez a versão dos componenentes no projeto principal ainda não tenham sido liberados para download no Maven. Para esse caso, ou você faz download do [meu fork](https://github.com/willianantunes/camel) e faz o build a partir da branch de trabalho com a versão necessária ou o download do [projeto oficial](https://github.com/apache/camel). 
+
 ## Fluxo mínimo viável
+
+Já não faz jus a versão atual. Atualizarei em breve.
 
 ![Mapa de navegação por opções](docs/fluxos-honesto-sqn.png?raw=true "Mapa de navegação por opções")
 
 ## Frutos do projeto
 
-- [Contribuição ao projeto open-source Apache Camel aprimorando o componente de integração com Telegram](https://github.com/apache/camel/pull/2318)
+- Contribuição ao projeto open-source [Apache Camel](http://camel.apache.org/) ([PR 2318](https://github.com/apache/camel/pull/2318) e [CAMEL-12478](https://issues.apache.org/jira/browse/CAMEL-12478)) aprimorando o componente de integração com [Telegram](https://github.com/apache/camel/blob/39c0d63d923bfe9236834ecb1c4470bb7e9e7eaa/components/camel-telegram/src/main/docs/telegram-component.adoc#telegram-component).
+- Correção de defeito para configuração programática com Spring do _Rest Client_ ([PR 2350](https://github.com/apache/camel/pull/2350) e [CAMEL-12541](https://issues.apache.org/jira/browse/CAMEL-12541)) pois funcionava apenas via XML para uso do componente [CXF-RS](https://github.com/apache/camel/blob/39c0d63d923bfe9236834ecb1c4470bb7e9e7eaa/components/camel-cxf/src/main/docs/cxfrs-component.adoc#cxf-rs-component).
 
 ## Links para referência/estudo
 
 - [Envio de mensagem customizada](https://core.telegram.org/bots#keyboards)
 - [Componente do Telegram para Apache Camel](https://github.com/apache/camel/blob/a989fea98ce32f5f622c576bf3ea08c1782116e2/components/camel-telegram/src/main/docs/telegram-component.adoc#telegram-component)
+- [Camel in Action, Second Edition](https://www.manning.com/books/camel-in-action-second-edition)

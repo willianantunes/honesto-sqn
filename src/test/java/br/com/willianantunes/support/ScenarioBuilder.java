@@ -11,6 +11,10 @@ import javax.persistence.Query;
 import javax.transaction.Transactional;
 
 import br.com.willianantunes.model.ChatTransaction;
+import br.com.willianantunes.route.LetMeQuitRoute;
+import br.com.willianantunes.route.SetupCitizenDesireRoute;
+import org.apache.camel.builder.AdviceWithRouteBuilder;
+import org.apache.camel.model.ModelCamelContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,14 +45,37 @@ public class ScenarioBuilder {
     public ScenarioBuilder unbuild() {
         
         Query createNativeQuery = entityManager.createNativeQuery("SHOW TABLES");
-        Object[] minhasTabelas = (Object[]) createNativeQuery.getResultList().get(0);
+        Object[] myTables = (Object[]) createNativeQuery.getResultList().get(0);
 
-        Arrays.stream(minhasTabelas)
+        Arrays.stream(myTables)
             .map(Object::toString)
             .filter(s -> s.startsWith("TB_"))
             .forEach(t -> entityManager.createNativeQuery("truncate table " + t).executeUpdate());
 
         return this;
+    }
+
+    public void prepareCamelEnvironment(ModelCamelContext camelContext) throws Exception {
+
+        camelContext.getRouteDefinition(SetupCitizenDesireRoute.ROUTE_ID_FIRST_CONTACT).adviceWith(camelContext,
+            new AdviceWithRouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+
+                    replaceFromWith("direct:telegram-entrance");
+                }
+            });
+
+        camelContext.getRouteDefinition(LetMeQuitRoute.ROUTE_ID_AFTER_FIRST_CONTACT).adviceWith(camelContext,
+            new AdviceWithRouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+
+                    weaveByToUri("telegram:bots").replace().to("mock:telegram-bot-exit");
+                }
+            });
+
+        camelContext.start();
     }
     
     public void build() {

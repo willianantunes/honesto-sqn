@@ -58,8 +58,8 @@ public class LetMeQuitRouteTest {
     public void setUp() throws Exception {
         
         if (!camelContext.getStatus().isStarted()) {
-            
-            prepareCamelEnvironment();
+
+            scenarioBuilder.prepareCamelEnvironment(camelContext);
         }
     }
     
@@ -98,11 +98,11 @@ public class LetMeQuitRouteTest {
     public void shouldInformWrongOption() {
 
         scenarioBuilder
-                .createRoom(Room.builder().chatId(42).build())
-                .withPolitician(Politician.builder().name("Sheev Palpatine").build())
-                .createChatTransaction(ChatTransaction.builder().firstName("Willian").lastName("Antunes")
-                        .sentAt(LocalDateTime.now()).finished(false).chatId(42).build())
-                .build();
+            .createRoom(Room.builder().chatId(42).build())
+            .withPolitician(Politician.builder().name("Sheev Palpatine").build())
+            .createChatTransaction(ChatTransaction.builder().firstName("Willian").lastName("Antunes")
+                    .sentAt(LocalDateTime.now()).finished(false).chatId(42).build())
+            .build();
 
         IncomingMessage message = createSampleIncommingMessageWithTextAndChatId("Xeev Palpatinee", "42");
 
@@ -124,27 +124,4 @@ public class LetMeQuitRouteTest {
                 assertThat(outgoingTextMessage.getText()).isEqualTo(messages.get(Messages.COMMAND_RETIRAR_WRONG_OPTION, message.getText()));
             });
     }
-    
-    private void prepareCamelEnvironment() throws Exception {
-        
-        camelContext.getRouteDefinition(SetupCitizenDesireRoute.ROUTE_ID_FIRST_CONTACT).adviceWith(camelContext,
-                new AdviceWithRouteBuilder() {
-                    @Override
-                    public void configure() throws Exception {
-                        
-                        replaceFromWith("direct:telegram-entrance");                        
-                    }
-                });
-        
-        camelContext.getRouteDefinition(LetMeQuitRoute.ROUTE_ID_AFTER_FIRST_CONTACT).adviceWith(camelContext,
-                new AdviceWithRouteBuilder() {
-                    @Override
-                    public void configure() throws Exception {
-                        
-                        weaveByToUri("telegram:bots").replace().to("mock:telegram-bot-exit");                        
-                    }
-                });        
-        
-        camelContext.start();
-    }    
 }

@@ -33,5 +33,5 @@ public interface JarbasAPI {
     @GET
     @Path("/chamber_of_deputies/reimbursement/{documentId}/receipt")
     @Produces(MediaType.APPLICATION_JSON)
-    Receipt reimbursementReceipt(@PathParam("documentId") Integer documentId);
+    Receipt reimbursementReceiptByDocumentId(@PathParam("documentId") Integer documentId);
 }

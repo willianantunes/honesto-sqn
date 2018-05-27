@@ -21,4 +21,4 @@ spring:
 
 serenata:
     jarbas:
-        endpoint: https://jarbas.serenata.ai/api
+        endpoint: https://jarbas.serenata.ai
