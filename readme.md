@@ -25,13 +25,26 @@ Não sei se existe algum problema com o projeto em si, mas não roda de primeira
 
 ### Download de correções e novas features para rodar projeto
 
-Como tive que criar e corrigir algumas situações no Apache Camel, dependendo de quando você baixar o repositório talvez a versão dos componenentes no projeto principal ainda não tenham sido liberados para download no Maven. Para esse caso, ou você faz download do [meu fork](https://github.com/willianantunes/camel) e faz o build a partir da branch de trabalho com a versão necessária ou o download do [projeto oficial](https://github.com/apache/camel). 
+Como tive que criar e corrigir algumas situações no Apache Camel, dependendo de quando você baixar o repositório talvez a versão dos componentes no projeto principal ainda não tenham sido liberados para download no Maven. Para esse caso, ou você faz download do [meu fork](https://github.com/willianantunes/camel) e faz o build a partir da branch de trabalho com a versão necessária ou o download do [projeto oficial](https://github.com/apache/camel). 
 
 ## Fluxo mínimo viável
 
 Já não faz jus a versão atual. Atualizarei em breve.
 
 ![Mapa de navegação por opções](docs/fluxos-honesto-sqn.png?raw=true "Mapa de navegação por opções")
+
+## Recursos (visão de alto nível) para MVP
+
+- [x] Controle de transação da conversa (máquina de estado).
+- [x] Caso a opção não esteja disponível informar o usuário e finalizar a transação da conversa.
+- [x] Listagem dos políticos configurados via opção _/atual_.
+- [x] Excluir determinado político configurado previamente via opção _/retirar_.
+- [x] Mapeamento dos serviços ofertados pelo Jarbas.
+- [x] Pesquisar histórico do político via opção _/pesquisar_.
+- [x] Informar usuário para esperar pacientemente até 3x com mensagens distintas já que o Jarbas demora para processar.
+- [ ] Usuário escolher qual político deseja receber notificações de gastos suspeitos via opção _/configurar_.
+- [ ] Envio de notificações (push notification) para usuários que configuraram o político que fez gasto suspeito.
+- [ ] Atualização da figura _fluxo mínimo viável_.
 
 ## Frutos do projeto
 
