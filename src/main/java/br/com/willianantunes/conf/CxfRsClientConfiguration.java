@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -28,10 +29,13 @@ import static org.springframework.util.StringUtils.isEmpty;
 @Configuration
 public class CxfRsClientConfiguration {
 
+    public static final String BEAN_JARBAS_SERVICE_ENDPOINT = "BEAN_JARBAS_SERVICE_ENDPOINT";
+    public static final String BEAN_JARBAS_SERVICE_ENDPOINT_CONFIGURER = "BEAN_JARBAS_SERVICE_ENDPOINT_CONFIGURER";
+
     @Value("${serenata.jarbas.endpoint}")
     private String serenataJarbasEndpoint;
 
-    @Bean
+    @Bean(BEAN_JARBAS_SERVICE_ENDPOINT)
     public SpringJAXRSClientFactoryBean serviceEndpoint() {
 
         if (isEmpty(serenataJarbasEndpoint))
@@ -45,7 +49,7 @@ public class CxfRsClientConfiguration {
         return clientFactoryBean;
     }
 
-    @Bean
+    @Bean(BEAN_JARBAS_SERVICE_ENDPOINT_CONFIGURER)
     public CxfRsEndpointConfigurer serviceEndpointConfigurer() {
 
         return new CxfRsEndpointConfigurer() {
@@ -63,6 +67,7 @@ public class CxfRsClientConfiguration {
                 clientConfiguration.getRequestContext().put("http.redirect.relative.uri", true);
                 HTTPClientPolicy httpClientPolicy = clientConfiguration.getHttpConduit().getClient();
                 httpClientPolicy.setAutoRedirect(true);
+                httpClientPolicy.setReceiveTimeout(Duration.ofSeconds(45).toMillis());
             }
 
             @Override

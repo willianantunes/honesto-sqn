@@ -2,10 +2,8 @@ package br.com.willianantunes.playground;
 
 
 import br.com.willianantunes.serenata.model.Receipt;
-import br.com.willianantunes.support.ScenarioBuilder;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
-import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.ExchangeBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.apache.camel.component.cxf.jaxrs.CxfRsEndpoint;
@@ -13,13 +11,13 @@ import org.apache.camel.component.cxf.jaxrs.CxfRsProducer;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
 import org.apache.camel.test.spring.UseAdviceWith;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 
+import static br.com.willianantunes.conf.CxfRsClientConfiguration.BEAN_JARBAS_SERVICE_ENDPOINT;
+import static br.com.willianantunes.conf.CxfRsClientConfiguration.BEAN_JARBAS_SERVICE_ENDPOINT_CONFIGURER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(CamelSpringBootRunner.class)
@@ -29,27 +27,11 @@ public class CxfRouteTest {
 
     @Autowired
     private ModelCamelContext camelContext;
-    @Autowired
-    private ProducerTemplate producerTemplate;
-    @Autowired
-    private ScenarioBuilder scenarioBuilder;
-
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    @Before
-    public void setUp() throws Exception {
-
-        if (!camelContext.getStatus().isStarted()) {
-
-            scenarioBuilder.prepareCamelEnvironment(camelContext);
-        }
-    }
 
     @Test
     public void cxfProducerWithJarbasProxy() throws Exception {
 
-        String uri = "cxfrs://bean://serviceEndpoint?cxfRsEndpointConfigurer=#serviceEndpointConfigurer";
+        String uri = String.format("cxfrs:bean:%s?cxfRsEndpointConfigurer=#%s", BEAN_JARBAS_SERVICE_ENDPOINT, BEAN_JARBAS_SERVICE_ENDPOINT_CONFIGURER);
 
         CxfRsEndpoint endpoint = camelContext.getEndpoint(uri, CxfRsEndpoint.class);
 

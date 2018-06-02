@@ -30,7 +30,7 @@ public class SetupCitizenDesireRoute extends RouteBuilder {
             .setProperty(PROPERTY_TELEGRAM_MESSAGE, body())   
             .toD(verifyUserConversation())
             .choice()
-                .when(simpleF("${body} is '%s' && ${body.size} > 0", List.class.getName()))
+                .when(simple("${body?.size} > 0"))
                     .toF("direct:%s", RedirectToResponsibleOptionRoute.DIRECT_ENDPOINT_RECEPTION)
                 .otherwise()
                     .toF("direct:%s", SetupCitizenDesireRoute.DIRECT_ENDPOINT_OPTIONS)

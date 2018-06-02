@@ -16,6 +16,12 @@ public class RouteHelper {
         return String.format("jpa:%s?namedQuery=%s&consumeDelete=%s&parameters={\"chatId\":${body.chat.id}}",
                 ChatTransaction.class.getName(), ChatTransaction.CHAT_TRANSACTION_NAMED_QUERY_SELECT_NOT_FINISHED_BY_CHAT_ID, false);
     }
+
+    public static String verifyUserConversation(String propertyTelegramMessage) {
+
+        return String.format("jpa:%s?namedQuery=%s&consumeDelete=%s&parameters={\"chatId\":${exchangeProperty[%s].chat.id}}",
+            ChatTransaction.class.getName(), ChatTransaction.CHAT_TRANSACTION_NAMED_QUERY_SELECT_NOT_FINISHED_BY_CHAT_ID, false, propertyTelegramMessage);
+    }
     
     public static String verifyWhoTheUserIsWatching() {
         
@@ -59,7 +65,7 @@ public class RouteHelper {
 
         return exchange -> {
             
-            IncomingMessage message = (IncomingMessage) exchange.getProperty(propertyTelegramMessage);
+            IncomingMessage message = exchange.getProperty(propertyTelegramMessage, IncomingMessage.class);
             
             ChatTransaction chatTransaction = ChatTransaction.builder()
                 .chatId(Integer.parseInt(message.getChat().getId()))

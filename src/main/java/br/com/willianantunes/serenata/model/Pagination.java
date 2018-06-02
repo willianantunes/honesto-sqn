@@ -15,11 +15,11 @@ import java.util.List;
 public class Pagination {
 
     @JsonProperty("count")
-    public Integer count;
+    private Integer count;
     @JsonProperty("next")
-    public String next;
+    private String next;
     @JsonProperty("previous")
-    public Object previous;
+    private Object previous;
     @JsonProperty("results")
-    public List<Reimbursement> results;
+    private List<Reimbursement> results;
 }

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Receipt {
 
     @JsonProperty("fetched")
-    public Boolean fetched;
+    private Boolean fetched;
     @JsonProperty("url")
-    public String url;
+    private String url;
 }

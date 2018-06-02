@@ -13,6 +13,7 @@ import javax.transaction.Transactional;
 import br.com.willianantunes.model.ChatTransaction;
 import br.com.willianantunes.route.LetMeQuitRoute;
 import br.com.willianantunes.route.SetupCitizenDesireRoute;
+import org.apache.camel.CamelContext;
 import org.apache.camel.builder.AdviceWithRouteBuilder;
 import org.apache.camel.model.ModelCamelContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,25 +58,34 @@ public class ScenarioBuilder {
 
     public void prepareCamelEnvironment(ModelCamelContext camelContext) throws Exception {
 
-        camelContext.getRouteDefinition(SetupCitizenDesireRoute.ROUTE_ID_FIRST_CONTACT).adviceWith(camelContext,
-            new AdviceWithRouteBuilder() {
-                @Override
-                public void configure() throws Exception {
+        prepareCamelEnvironment(Optional.empty(), camelContext);
+    }
 
-                    replaceFromWith("direct:telegram-entrance");
-                }
-            });
+    public void prepareCamelEnvironment(Optional<ThrowingConsumer<CamelContext>> clientRules, ModelCamelContext camelContext) throws Exception {
 
-        camelContext.getRouteDefinition(LetMeQuitRoute.ROUTE_ID_AFTER_FIRST_CONTACT).adviceWith(camelContext,
-            new AdviceWithRouteBuilder() {
-                @Override
-                public void configure() throws Exception {
+        if (!camelContext.getStatus().isStarted()) {
 
-                    weaveByToUri("telegram:bots").replace().to("mock:telegram-bot-exit");
-                }
-            });
+            camelContext.getRouteDefinition(SetupCitizenDesireRoute.ROUTE_ID_FIRST_CONTACT).adviceWith(camelContext,
+                new AdviceWithRouteBuilder() {
+                    @Override
+                    public void configure() throws Exception {
 
-        camelContext.start();
+                        replaceFromWith("direct:telegram-entrance");
+                    }
+                });
+
+            camelContext.getRouteDefinition(LetMeQuitRoute.ROUTE_ID_AFTER_FIRST_CONTACT).adviceWith(camelContext,
+                new AdviceWithRouteBuilder() {
+                    @Override
+                    public void configure() throws Exception {
+
+                        weaveByToUri("telegram:bots").replace().to("mock:telegram-bot-exit");
+                    }
+                });
+
+            clientRules.ifPresent(c -> c.accept(camelContext));
+            camelContext.start();
+        }
     }
     
     public void build() {

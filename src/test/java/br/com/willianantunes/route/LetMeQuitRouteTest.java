@@ -56,11 +56,8 @@ public class LetMeQuitRouteTest {
     
     @Before
     public void setUp() throws Exception {
-        
-        if (!camelContext.getStatus().isStarted()) {
 
-            scenarioBuilder.prepareCamelEnvironment(camelContext);
-        }
+        scenarioBuilder.prepareCamelEnvironment(camelContext);
     }
     
     @Test

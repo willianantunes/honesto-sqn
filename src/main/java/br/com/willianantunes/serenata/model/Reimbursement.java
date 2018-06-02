@@ -8,9 +8,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -20,79 +22,139 @@ import java.util.List;
 public class Reimbursement {
 
     @JsonProperty("all_net_values")
-    public List<Double> allNetValues = null;
+    private List<Double> allNetValues = null;
     @JsonProperty("all_reimbursement_numbers")
-    public List<Integer> allReimbursementNumbers = null;
+    private List<Integer> allReimbursementNumbers = null;
     @JsonProperty("all_reimbursement_values")
-    public List<Integer> allReimbursementValues = null;
+    private List<Integer> allReimbursementValues = null;
     @JsonProperty("document_value")
-    public Double documentValue;
+    private Double documentValue;
     @JsonProperty("probability")
-    public Object probability;
+    private Object probability;
     @JsonProperty("receipt")
-    public Receipt receipt;
+    private Receipt receipt;
     @JsonProperty("rosies_tweet")
-    public Object rosiesTweet;
+    private Object rosiesTweet;
     @JsonProperty("remark_value")
-    public Integer remarkValue;
+    private Integer remarkValue;
     @JsonProperty("total_net_value")
-    public Double totalNetValue;
+    private Double totalNetValue;
     @JsonProperty("total_reimbursement_value")
-    public Integer totalReimbursementValue;
+    private Integer totalReimbursementValue;
     @JsonProperty("document_id")
-    public Integer documentId;
+    private Integer documentId;
     @JsonProperty("last_update")
-    public ZonedDateTime lastUpdate;
+    private ZonedDateTime lastUpdate;
     @JsonProperty("year")
-    public Integer year;
+    private Integer year;
     @JsonProperty("applicant_id")
-    public Integer applicantId;
+    private Integer applicantId;
     @JsonProperty("congressperson_id")
-    public Integer congresspersonId;
+    private Integer congresspersonId;
     @JsonProperty("congressperson_name")
-    public String congresspersonName;
+    private String congresspersonName;
     @JsonProperty("congressperson_document")
-    public Integer congresspersonDocument;
+    private Integer congresspersonDocument;
     @JsonProperty("party")
-    public String party;
+    private String party;
     @JsonProperty("state")
-    public String state;
+    private String state;
     @JsonProperty("term_id")
-    public Integer termId;
+    private Integer termId;
     @JsonProperty("term")
-    public Integer term;
+    private Integer term;
     @JsonProperty("subquota_id")
-    public Integer subquotaId;
+    private Integer subquotaId;
     @JsonProperty("subquota_description")
-    public String subquotaDescription;
+    private String subquotaDescription;
     @JsonProperty("subquota_group_id")
-    public Integer subquotaGroupId;
+    private Integer subquotaGroupId;
     @JsonProperty("subquota_group_description")
-    public String subquotaGroupDescription;
+    private String subquotaGroupDescription;
     @JsonProperty("supplier")
-    public String supplier;
+    private String supplier;
     @JsonProperty("cnpj_cpf")
-    public String cnpjCpf;
+    private String cnpjCpf;
     @JsonProperty("document_type")
-    public Integer documentType;
+    private Integer documentType;
     @JsonProperty("document_number")
-    public String documentNumber;
+    private String documentNumber;
     @JsonProperty("issue_date")
-    public LocalDate issueDate;
+    private LocalDate issueDate;
     @JsonProperty("month")
-    public Integer month;
+    private Integer month;
     @JsonProperty("installment")
-    public Integer installment;
+    private Integer installment;
     @JsonProperty("batch_number")
-    public Integer batchNumber;
+    private Integer batchNumber;
     @JsonProperty("passenger")
-    public String passenger;
+    private String passenger;
     @JsonProperty("leg_of_the_trip")
-    public String legOfTheTrip;
+    private String legOfTheTrip;
     @JsonProperty("suspicions")
-    public Object suspicions;
+    private Suspicions suspicions;
     @JsonProperty("receipt_text")
-    public Object receiptText;
+    private Object receiptText;
     @JsonProperty("search_vector")
-    public String searchVector;
+    private String searchVector;
+
+    public ReimbursementDto toDto() {
+
+        return ReimbursementDto.builder()
+            .year(year)
+            .subquotaDescription(subquotaDescription)
+            .subquotaGroupDescription(subquotaGroupDescription)
+            .supplier(supplier)
+            .cnpjCpf(cnpjCpf)
+            .issueDate(issueDate)
+            .documentId(documentId)
+            .documentValue(documentValue)
+            .suspicions(evaluateWhichSuspicion())
+            .receiptUrl(receipt != null && receipt.getUrl() != null ? receipt.getUrl() : "Indisponível")
+            .build();
+    }
+
+    private String evaluateWhichSuspicion() {
+
+        // TODO: Use messages.properties instead of hard-coded values
+        if (suspicions != null) {
+            if (suspicions.isIrregularCompaniesClassifier())
+                return "CNPJ irregular";
+            if (suspicions.isMealPriceOutlier())
+                return "Preço de refeição muito incomum";
+            if (suspicions.isMealPriceOutlierClassifier())
+                return "Valor suspeito de refeição";
+            if (suspicions.isOverMonthlySubquotaLimit())
+                return "Extrapolou o limite da (sub)cota parlamentar";
+            if (suspicions.isTraveledSpeedsClassifier())
+                return "Viagens muito rápidas";
+            if (suspicions.isElectionExpensesClassifier())
+                return "Valor supeito gasto para eleições";
+        }
+
+        return "N/A";
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ReimbursementDto {
+
+        private Integer year;
+        private String subquotaDescription;
+        private String subquotaGroupDescription;
+        private String supplier;
+        private String cnpjCpf;
+        private LocalDate issueDate;
+        private Integer documentId;
+        private Double documentValue;
+        private String suspicions;
+        private String receiptUrl;
+
+        public Object[] toParameters() {
+
+            return Arrays.asList(year, subquotaDescription, subquotaGroupDescription, supplier, cnpjCpf, issueDate, documentId, documentValue, suspicions, receiptUrl).toArray();
+        }
+    }
 }

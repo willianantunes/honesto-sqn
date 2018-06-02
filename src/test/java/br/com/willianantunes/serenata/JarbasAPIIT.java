@@ -54,7 +54,7 @@ public class JarbasAPIIT {
 
         assertThat(reimbursement).isNotNull().satisfies(r -> {
             assertThat(r.getReceipt().getUrl()).isEqualTo("http://www.camara.gov.br/cota-parlamentar/documentos/publ/2907/2017/6470354.pdf");
-            assertThat(r.congresspersonId).isEqualTo(92346);
+            assertThat(r.getCongresspersonId()).isEqualTo(92346);
         });
     }
 
@@ -76,7 +76,7 @@ public class JarbasAPIIT {
         assertThat(pagination).isNotNull().satisfies(p -> {
 
             assertThat(p.getNext()).isNotBlank();
-            assertThat(p.results.stream().findAny()).isNotEmpty();
+            assertThat(p.getResults().stream().findAny()).isNotEmpty();
         });
     }
 
@@ -88,7 +88,7 @@ public class JarbasAPIIT {
         assertThat(pagination).isNotNull().satisfies(p -> {
 
             assertThat(p.getNext()).isNotBlank();
-            assertThat(p.results.stream().filter(r -> r.getSupplier().equalsIgnoreCase("POSTO ROMERO"))
+            assertThat(p.getResults().stream().filter(r -> r.getSupplier().equalsIgnoreCase("POSTO ROMERO"))
                 .findAny()).isNotEmpty();
         });
     }
