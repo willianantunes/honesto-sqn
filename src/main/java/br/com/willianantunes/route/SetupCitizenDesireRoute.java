@@ -31,6 +31,7 @@ public class SetupCitizenDesireRoute extends RouteBuilder {
             .toD(verifyUserConversation())
             .choice()
                 .when(simple("${body?.size} > 0"))
+                    .setBody(simple("${body[0]}"))
                     .toF("direct:%s", RedirectToResponsibleOptionRoute.DIRECT_ENDPOINT_RECEPTION)
                 .otherwise()
                     .toF("direct:%s", SetupCitizenDesireRoute.DIRECT_ENDPOINT_OPTIONS)

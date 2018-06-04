@@ -42,9 +42,17 @@ Já não faz jus a versão atual. Atualizarei em breve.
 - [x] Mapeamento dos serviços ofertados pelo Jarbas.
 - [x] Pesquisar histórico do político via opção _/pesquisar_.
 - [x] Informar usuário para esperar pacientemente até 3x com mensagens distintas já que o Jarbas demora para processar.
+- [x] Caso o Jarbas informe que tenha mais item do retorno da pesquisa, perguntar ao usuário se quer receber mais registros da pesquisa ou não.
 - [ ] Usuário escolher qual político deseja receber notificações de gastos suspeitos via opção _/configurar_.
 - [ ] Envio de notificações (push notification) para usuários que configuraram o político que fez gasto suspeito.
 - [ ] Atualização da figura _fluxo mínimo viável_.
+- [ ] Realizar teste de estresse para medir consumo de memória e CPU.
+- [ ] Monitoramento via Jolokia ou JMX com dashboard.
+
+## Ideias a serem desenvolvidas
+
+- Desenvolver componente para usar Facebook Messenger já que hoje não existe para o Apache Camel.
+- Criar adaptador genérico a fim que o FROM (consumer) e o TO (producer) suporte não só o Telegram mas qualquer componente que receba/responda algo, sendo assim um wrapper deverá ser usado tanto para a mensagem de entrada quando de saída já que hoje o projeto utiliza o esquema de mensagem do componente do Telegram. 
 
 ## Frutos do projeto
 

@@ -1,20 +1,17 @@
 package br.com.willianantunes.model;
 
-import java.time.LocalDateTime;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @Builder
@@ -48,11 +45,16 @@ public class ChatTransaction {
     @Column
     private String chatEndpoint;
     @Column
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Map<String, String> chatProperties;
+    @Column
     private LocalDateTime createdAt;
     @Column
     private LocalDateTime sentAt;
     @Column
     private Boolean finished;
+    @Column
+    private boolean executed;
     
     @PrePersist
     private void prePersiste() {

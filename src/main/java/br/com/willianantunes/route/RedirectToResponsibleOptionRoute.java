@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import br.com.willianantunes.model.ChatTransaction;
 
+import static br.com.willianantunes.route.RouteHelper.prepareChatTransactionToBeUpdatedUsingBodyMessage;
+
 @Component
 public class RedirectToResponsibleOptionRoute extends RouteBuilder {
 
@@ -25,31 +27,11 @@ public class RedirectToResponsibleOptionRoute extends RouteBuilder {
     public void configure() {
 
         fromF("direct:%s", DIRECT_ENDPOINT_RECEPTION).routeId(ROUTE_ID_FIRST_CONTACT)
-            .process(prepareChatTransactionToBeUpdated())
+            .process(prepareChatTransactionToBeUpdatedUsingBodyMessage(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
             .toF("jpa:%s&useExecuteUpdate=%s", ChatTransaction.class.getName(), true)
             .log("Redirecting user ${body.firstName} ${body.lastName} to endpoint ${body.chatEndpoint}")
             .setProperty(PROPERTY_REDIRECT_POINTER, simple("${body.chatEndpoint}"))
             .setBody(exchangeProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
             .toD(String.format("direct:${exchangeProperty[%s]}", PROPERTY_REDIRECT_POINTER));
-    }
-
-    private Processor prepareChatTransactionToBeUpdated() {
-        
-        return exchange -> {
-            
-            Optional<ChatTransaction> previousMessage = exchange.getIn().getBody(List.class).stream().findFirst();
-            IncomingMessage message = (IncomingMessage) exchange.getProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE);
-            
-            previousMessage.ifPresent(chatTransaction -> {
-                
-                chatTransaction.setMessageId(message.getMessageId().intValue());
-                chatTransaction.setMessage(message.getText());
-                chatTransaction.setFirstName(message.getFrom().getFirstName());
-                chatTransaction.setLastName(message.getFrom().getLastName());
-                chatTransaction.setSentAt(LocalDateTime.ofInstant(message.getDate(), ZoneId.systemDefault()));
-                
-                exchange.getIn().setBody(chatTransaction);
-            });
-        };
     }
 }

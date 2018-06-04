@@ -2,8 +2,13 @@ package br.com.willianantunes.route;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.apache.camel.Processor;
+import org.apache.camel.builder.SimpleBuilder;
 import org.apache.camel.component.telegram.model.IncomingMessage;
 
 import br.com.willianantunes.model.ChatTransaction;
@@ -39,6 +44,61 @@ public class RouteHelper {
 
         return String.format("jpa:%s?namedQuery=%s&useExecuteUpdate=%s&parameters={\"chatId\":${exchangeProperty[%s].chat.id}}",
                 ChatTransaction.class.getName(), ChatTransaction.CHAT_TRANSACTION_NAMED_QUERY_FINISH_CONVERSATION_BY_CHAT_ID, true, propertyTelegramMessage);
+    }
+
+    public static Processor prepareChatTransactionToBeUpdatedUsingBodyMessage(String propertyTelegramMessage) {
+
+        return exchange -> {
+
+            Optional<ChatTransaction> previousMessage = Optional.ofNullable(exchange.getIn().getBody(ChatTransaction.class));
+            IncomingMessage message = (IncomingMessage) exchange.getProperty(propertyTelegramMessage);
+
+            previousMessage.ifPresent(chatTransaction -> {
+
+                chatTransaction.setMessageId(message.getMessageId().intValue());
+                chatTransaction.setMessage(message.getText());
+                chatTransaction.setFirstName(message.getFrom().getFirstName());
+                chatTransaction.setLastName(message.getFrom().getLastName());
+                chatTransaction.setSentAt(LocalDateTime.ofInstant(message.getDate(), ZoneId.systemDefault()));
+
+                exchange.getIn().setBody(chatTransaction);
+            });
+        };
+    }
+
+    public static Processor prepareChatTransactionToBeUpdatedAsExecuting() {
+
+        return exchange -> {
+
+            IncomingMessage incomingMessage = exchange.getIn().getBody(IncomingMessage.class);
+
+            ChatTransaction chatTransaction = ChatTransaction.builder()
+                .chatId(Integer.parseInt(incomingMessage.getChat().getId()))
+                .executed(false)
+                .build();
+
+            exchange.getIn().setBody(chatTransaction);
+        };
+    }
+
+    public static Processor prepareChatTransactionToBeUpdatedWithCustomProperty(String propertyTelegramMessage, String chatEndpoint, String property) {
+
+        return exchange -> {
+
+            SimpleBuilder simple = new SimpleBuilder(String.format("${exchangeProperty[%s]}", property));
+            String value = simple.evaluate(exchange, String.class);
+
+            IncomingMessage message = exchange.getProperty(propertyTelegramMessage, IncomingMessage.class);
+            ChatTransaction chatTransaction = exchange.getIn().getBody(ChatTransaction.class);
+
+            Map<String, String> properties = Optional.ofNullable(chatTransaction.getChatProperties()).orElse(new HashMap<>());
+            properties.put(property, value);
+            chatTransaction.setChatProperties(properties);
+            chatTransaction.setChatEndpoint(chatEndpoint);
+            chatTransaction.setExecuted(true);
+
+            exchange.getIn().setBody(chatTransaction);
+        };
     }
     
     public static Processor prepareMessageToBePersisted(String chatEndpoint) {

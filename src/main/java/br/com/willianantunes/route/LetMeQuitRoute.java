@@ -6,6 +6,7 @@ import br.com.willianantunes.model.ChatTransaction;
 import br.com.willianantunes.model.Politician;
 import br.com.willianantunes.model.Room;
 import br.com.willianantunes.repository.RoomRepository;
+import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.telegram.TelegramParseMode;
@@ -62,59 +63,50 @@ public class LetMeQuitRoute extends RouteBuilder {
             .toD(verifyTheUserIsWatching())
             .choice()
                 .when(simple("${body?.size} > 0"))
-                    .process(removePoliticianByItsId())
+                    .process(this::removePoliticianByItsId)
                     .log(String.format("Politician ${body[0].name} was removed from chat room ${exchangeProperty[%s].chat.id}", SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
                     .setBody(constant(messages.get(Messages.COMMAND_RETIRAR_COMPLETED)))
                 .otherwise()
-                    .process(replyWarningAboutWrongOptionSelected())
+                    .process(this::replyWarningAboutWrongOptionSelected)
                 .end()
             .setProperty(PROPERTY_STORED_MESSAGE, body())
             .toD(finishChatTransaction(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
             .log("ChatTransaction with ID ${body} was configured as finished")
-            .process(configureReplyToRemoveCustomKeyBoard())
+            .process(this::configureReplyToRemoveCustomKeyBoard)
             .to("log:INFO?showHeaders=true")
             .to("telegram:bots");
     }
 
-    private Processor configureReplyToRemoveCustomKeyBoard() {
+    private void configureReplyToRemoveCustomKeyBoard(Exchange exchange) {
 
-        return exchange -> {
+        ReplyKeyboardMarkup replyKeyboardMarkup = ReplyKeyboardMarkup.builder()
+            .removeKeyboard(true)
+            .build();
 
-            ReplyKeyboardMarkup replyKeyboardMarkup = ReplyKeyboardMarkup.builder()
-                    .removeKeyboard(true)
-                    .build();
+        OutgoingTextMessage message = OutgoingTextMessage.builder()
+            .text(exchange.getProperty(PROPERTY_STORED_MESSAGE, String.class))
+            .parseMode(TelegramParseMode.MARKDOWN.getCode())
+            .replyKeyboardMarkup(replyKeyboardMarkup).build();
 
-            OutgoingTextMessage message = OutgoingTextMessage.builder()
-                    .text(exchange.getProperty(PROPERTY_STORED_MESSAGE, String.class))
-                    .parseMode(TelegramParseMode.MARKDOWN.getCode())
-                    .replyKeyboardMarkup(replyKeyboardMarkup).build();
-
-            exchange.getIn().setBody(message);
-        };
+        exchange.getIn().setBody(message);
     }
 
-    private Processor replyWarningAboutWrongOptionSelected() {
+    private void replyWarningAboutWrongOptionSelected(Exchange exchange) {
 
-        return exchange -> {
-
-            IncomingMessage message = (IncomingMessage) exchange.getProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE);
-            exchange.getIn().setBody(messages.get(Messages.COMMAND_RETIRAR_WRONG_OPTION, message.getText()));
-        };
+        IncomingMessage message = (IncomingMessage) exchange.getProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE);
+        exchange.getIn().setBody(messages.get(Messages.COMMAND_RETIRAR_WRONG_OPTION, message.getText()));
     }
 
-    private Processor removePoliticianByItsId() {
-        
-        return exchange -> {
+    private void removePoliticianByItsId(Exchange exchange) {
 
-            Politician politician = exchange.getIn().getBody(Politician.class);
-            IncomingMessage message = (IncomingMessage) exchange.getProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE);
+        Politician politician = exchange.getIn().getBody(Politician.class);
+        IncomingMessage message = (IncomingMessage) exchange.getProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE);
 
-            transactionalContext.execute(() -> {
+        transactionalContext.execute(() -> {
 
-                Optional<Room> room = roomRepository.findByChatId(Integer.parseInt(message.getChat().getId()));
-                return room.get().getPoliticians().removeIf(p -> p.getId().equals(politician.getId()));
-            });
-        };
+            Optional<Room> room = roomRepository.findByChatId(Integer.parseInt(message.getChat().getId()));
+            return room.get().getPoliticians().removeIf(p -> p.getId().equals(politician.getId()));
+        });
     }
 
     private Processor prepareMessageWithCustomKeyboardAndStoreInProperty(String property) {
