@@ -46,7 +46,7 @@ public class SetupCitizenDesireRoute extends RouteBuilder {
                     .toF("direct:%s", WatchPoliticianRoute.DIRECT_ENDPOINT_RECEPTION)
                 .when(simple("${body.text} == '/retirar'"))
                     .toF("direct:%s", LetMeQuitRoute.DIRECT_ENDPOINT_RECEPTION)
-                .when(simple("${body.text} == '/start'"))
+                .when(simple("${body.text} == '/start' || ${body.text} == '/ajuda'"))
                     .toF("direct:%s", LetMeStartRoute.DIRECT_ENDPOINT_RECEPTION)
                 .when(simple("${body.text} == '/pesquisar'"))
                     .toF("direct:%s", ResearchPoliticianRoute.DIRECT_ENDPOINT_RECEPTION)

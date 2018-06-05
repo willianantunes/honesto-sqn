@@ -2,10 +2,8 @@ package br.com.willianantunes.route;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.AbstractMap.SimpleImmutableEntry;
 
 import org.apache.camel.Processor;
 import org.apache.camel.builder.SimpleBuilder;
@@ -66,34 +64,31 @@ public class RouteHelper {
         };
     }
 
-    public static Processor prepareChatTransactionToBeUpdatedAsExecuting() {
+    public static Processor prepareChatTransactionFromBodyToBeUpdatedAsExecuting() {
 
         return exchange -> {
 
-            IncomingMessage incomingMessage = exchange.getIn().getBody(IncomingMessage.class);
-
-            ChatTransaction chatTransaction = ChatTransaction.builder()
-                .chatId(Integer.parseInt(incomingMessage.getChat().getId()))
-                .executed(false)
-                .build();
-
+            ChatTransaction chatTransaction = exchange.getIn().getBody(ChatTransaction.class);
+            chatTransaction.setExecuted(false);
             exchange.getIn().setBody(chatTransaction);
         };
     }
 
-    public static Processor prepareChatTransactionToBeUpdatedWithCustomProperty(String propertyTelegramMessage, String chatEndpoint, String property) {
+    public static Processor prepareChatTransactionToBeUpdatedWithCustomProperties(String propertyTelegramMessage, String chatEndpoint, String ... properties) {
 
         return exchange -> {
-
-            SimpleBuilder simple = new SimpleBuilder(String.format("${exchangeProperty[%s]}", property));
-            String value = simple.evaluate(exchange, String.class);
 
             IncomingMessage message = exchange.getProperty(propertyTelegramMessage, IncomingMessage.class);
             ChatTransaction chatTransaction = exchange.getIn().getBody(ChatTransaction.class);
 
-            Map<String, String> properties = Optional.ofNullable(chatTransaction.getChatProperties()).orElse(new HashMap<>());
-            properties.put(property, value);
-            chatTransaction.setChatProperties(properties);
+            Map<String, String> chatProperties = Optional.ofNullable(chatTransaction.getChatProperties()).orElse(new HashMap<>());
+
+            Arrays.stream(properties)
+                .map(property -> new SimpleImmutableEntry<>(property, new SimpleBuilder(String.format("${exchangeProperty[%s]}", property))))
+                .filter(e -> e.getValue().evaluate(exchange, String.class) != null)
+                .forEach(e -> chatProperties.put(e.getKey(), e.getValue().evaluate(exchange, String.class)));
+
+            chatTransaction.setChatProperties(chatProperties);
             chatTransaction.setChatEndpoint(chatEndpoint);
             chatTransaction.setExecuted(true);
 

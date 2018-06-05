@@ -4,7 +4,7 @@ camel:
     name: camel-context-honesto-sqn
   component:
     telegram:
-      authorization-token: 503244464:AAGyrLKRYA--fQML-donFZEiIWHF6uTORco
+      authorization-token: 503244464:AAHjAiIUskr4jpicDJ8vEUpHz0pZ3SjjK-Q
 
 spring:
     application:

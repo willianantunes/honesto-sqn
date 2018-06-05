@@ -26,7 +26,7 @@ import java.util.*;
 import static br.com.willianantunes.conf.CxfRsClientConfiguration.BEAN_JARBAS_SERVICE_ENDPOINT;
 import static br.com.willianantunes.conf.CxfRsClientConfiguration.BEAN_JARBAS_SERVICE_ENDPOINT_CONFIGURER;
 import static br.com.willianantunes.route.RouteHelper.finishChatTransaction;
-import static br.com.willianantunes.route.RouteHelper.prepareChatTransactionToBeUpdatedWithCustomProperty;
+import static br.com.willianantunes.route.RouteHelper.prepareChatTransactionToBeUpdatedWithCustomProperties;
 import static br.com.willianantunes.route.RouteHelper.verifyUserConversation;
 import static br.com.willianantunes.route.SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE;
 
@@ -41,8 +41,9 @@ public class SearchPoliticianRoute extends RouteBuilder {
     public static final String DIRECT_ENDPOINT_DEAD_LETTER = ROUTE_ID_FIRST_CONTACT.concat("-DIRECT_ENDPOINT_DEAD_LETTER");
     public static final String DIRECT_ENDPOINT_UPDATE_TRANSACTION = ROUTE_ID_FIRST_CONTACT.concat("-DIRECT_ENDPOINT_UPDATE_TRANSACTION");
 
+    public static final String PROPERTY_TEXT_SEARCH = "PROPERTY_TEXT_SEARCH";
     public static final String PROPERTY_NEXT_PAGE = "PROPERTY_NEXT_PAGE";
-    public static final String PROPERTY_FIRST_MESSAGE = "PROPERTY_FIRST_MESSAGE";
+    public static final String PROPERTY_CHAT_TRANSACTION = "PROPERTY_CHAT_TRANSACTION";
 
     @Autowired
     private Messages messages;
@@ -52,12 +53,13 @@ public class SearchPoliticianRoute extends RouteBuilder {
 
         fromF("direct:%s", DIRECT_ENDPOINT_RECEPTION).routeId(ROUTE_ID_FIRST_CONTACT)
             .toD(verifyUserConversation(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
+            .setBody(simple("${body[0]}"))
             .choice()
-                .when(simpleF("${body?.size} > 0 && ${body[0].chatProperties?.size} != 0", PROPERTY_NEXT_PAGE))
-                    .setBody(simple("${body[0]}"))
-                    .setProperty(PROPERTY_FIRST_MESSAGE, simple("${body.message}"))
+                .when(simpleF("${body.chatProperties?.size} != 0", PROPERTY_NEXT_PAGE))
+                    .setProperty(PROPERTY_CHAT_TRANSACTION, simple("${body}"))
                     .process(preparaToCallServiceByProperty())
                 .otherwise()
+                    .setProperty(PROPERTY_TEXT_SEARCH, simple("${body.message}"))
                     .setBody(exchangeProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
                     .setBody(simple("${body.text}"))
                     .setHeader(CxfConstants.OPERATION_NAME, constant("findReimbursement"))
@@ -77,7 +79,7 @@ public class SearchPoliticianRoute extends RouteBuilder {
             .choice()
                 .when(simpleF("${exchangeProperty[%s]} != null", PROPERTY_NEXT_PAGE))
                     .toD(verifyUserConversation(PROPERTY_TELEGRAM_MESSAGE))
-                    .process(prepareChatTransactionToBeUpdatedWithCustomProperty(PROPERTY_TELEGRAM_MESSAGE, ResearchPoliticianRoute.DIRECT_ENDPOINT_AFTER_RECEPTION, PROPERTY_NEXT_PAGE))
+                    .process(prepareChatTransactionToBeUpdatedWithCustomProperties(PROPERTY_TELEGRAM_MESSAGE, ResearchPoliticianRoute.DIRECT_ENDPOINT_AFTER_RECEPTION, PROPERTY_NEXT_PAGE, PROPERTY_TEXT_SEARCH))
                     .toF("jpa:%s&useExecuteUpdate=%s", ChatTransaction.class.getName(), true)
                     .log("Property created to be used by the endpoint ${body.chatEndpoint}. Content: ${body.chatProperties}")
                 .otherwise()
@@ -116,11 +118,23 @@ public class SearchPoliticianRoute extends RouteBuilder {
     private void configureMessageOutput(Exchange exchange) {
 
         IncomingMessage incomingMessage = exchange.getProperty(PROPERTY_TELEGRAM_MESSAGE, IncomingMessage.class);
-        Optional<String> optionalText = Optional.ofNullable(exchange.getProperty(PROPERTY_FIRST_MESSAGE, String.class));
-        String textParameter = optionalText.orElse(incomingMessage.getText());
-        String keyFirstMessage = optionalText.isPresent()? Messages.COMMAND_RESEARCH_OUTPUT_MORE : Messages.COMMAND_RESEARCH_OUTPUT_START;
-        String chatId = incomingMessage.getChat().getId();
+        Optional<ChatTransaction> optionalChatTransaction = Optional.ofNullable(exchange.getProperty(PROPERTY_CHAT_TRANSACTION, ChatTransaction.class));
         Pagination pagination = exchange.getIn().getBody(Pagination.class);
+
+        String textParameter = null;
+        String keyFirstMessage = null;
+
+        if (optionalChatTransaction.isPresent()) {
+
+            keyFirstMessage = Messages.COMMAND_RESEARCH_OUTPUT_MORE;
+            textParameter = optionalChatTransaction.get().getChatProperties().get(PROPERTY_TEXT_SEARCH);
+        } else {
+
+            textParameter = incomingMessage.getText();
+            keyFirstMessage = Messages.COMMAND_RESEARCH_OUTPUT_START;
+        }
+
+        String chatId = incomingMessage.getChat().getId();
         List<Reimbursement> results = pagination.getResults();
 
         List<OutgoingTextMessage> outgoingTextMessages = new ArrayList<>();

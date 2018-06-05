@@ -103,13 +103,15 @@ public class ResearchPoliticianRoute extends RouteBuilder {
             .to("telegram:bots");
 
         fromF("direct:%s", DIRECT_ENDPOINT_EVALUATE_ANSWER).routeId(ROUTE_ID_EVALUATE_ANSWER).startupOrder(5)
+            .setProperty(PROPERTY_STORED_MESSAGE, body())
             .setBody(exchangeProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
             .choice()
                 .when(simpleF("${body.text} == '%s'", messages.get(Messages.COMMAND_RESEARCH_BUTTON_MORE)))
-                    .process(prepareChatTransactionToBeUpdatedAsExecuting())
-                    // TODO: Atualizar EXECUTED para enviar mensagens de espera...s
-                    // .toF("jpa:%s&useExecuteUpdate=%s", ChatTransaction.class.getName(), true)
-                    // .log("ChatTransaction with chat id ${body.chatId} updated with executed as false")
+                    .setBody(exchangeProperty(PROPERTY_STORED_MESSAGE))
+                    .process(prepareChatTransactionFromBodyToBeUpdatedAsExecuting())
+                    .toF("jpa:%s&useExecuteUpdate=%s", ChatTransaction.class.getName(), true)
+                    .log("ChatTransaction with chat id ${body.chatId} updated with executed as false")
+                    .setBody(exchangeProperty(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
                     .toF("direct:%s", DIRECT_ENDPOINT_SEARCH_POLITICIAN)
                 .when(simpleF("${body.text} == '%s'", messages.get(Messages.COMMAND_RESEARCH_BUTTON_SATISFIED)))
                     .toD(finishChatTransaction(SetupCitizenDesireRoute.PROPERTY_TELEGRAM_MESSAGE))
