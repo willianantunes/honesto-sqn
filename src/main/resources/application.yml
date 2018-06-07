@@ -1,10 +1,10 @@
 camel:
-  springboot:
-    main-run-controller: true
-    name: camel-context-honesto-sqn
-  component:
-    telegram:
-      authorization-token: 503244464:AAHjAiIUskr4jpicDJ8vEUpHz0pZ3SjjK-Q
+    springboot:
+        main-run-controller: true
+        name: camel-context-honesto-sqn
+    component:
+        telegram:
+            authorization-token: YOUR-TOKEN-HERE
 
 spring:
     application:
@@ -22,3 +22,31 @@ spring:
 serenata:
     jarbas:
         endpoint: https://jarbas.serenata.ai
+
+dataSource:
+    url: jdbc:h2:mem:honesto-sqn;DB_CLOSE_DELAY=-1
+  
+---
+
+spring:
+    profiles: development-staging-file
+
+spring.jpa.hibernate.ddl-auto: update
+    
+dataSource:
+    url: jdbc:h2:file:/home/wantunes/Development/labs-own/database/honesto-sqn-db
+
+---
+
+# Comando para rodar o container:
+# docker run -d -p 1521:1521 -p 81:81 --name honest-database oscarfonts/h2
+# docker run -d -p 1521:1521 -p 81:81 -v /home/wantunes/Development/labs-own/database:/opt/h2-data --name honest-database oscarfonts/h2
+# Caso tente acessar a interface WEB, usar o seguinte JDBC URL para conectar: jdbc:h2:tcp://localhost:1521/opt/h2-data
+
+spring:
+    profiles: development-staging-h2-tcp
+
+spring.jpa.hibernate.ddl-auto: update
+  
+dataSource:
+    url: jdbc:h2:tcp://localhost:1521/opt/h2-data
